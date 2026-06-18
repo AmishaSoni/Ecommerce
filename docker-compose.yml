@@ -1,31 +1,39 @@
-version: '3.8'
+version: '3.9'
 
 services:
   db:
     image: postgres:16-alpine
-    container_name: ecommerce-db
+    container_name: ecommerce-postgres
     environment:
-      POSTGRES_USER: ecom_user
-      POSTGRES_PASSWORD: ecom_password
-      POSTGRES_DB: ecommerce
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Pass123
+      POSTGRES_DB: ecomdb
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ecom_user -d ecommerce"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ecomdb"]
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - ecommerce-network
+    restart: unless-stopped
 
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: ecommerce-app
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/ecommerce
-      SPRING_DATASOURCE_USERNAME: ecom_user
-      SPRING_DATASOURCE_PASSWORD: ecom_password
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/ecomdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: Pass123
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: false
+      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
     ports:
       - "8080:8080"
     depends_on:
@@ -33,6 +41,9 @@ services:
         condition: service_healthy
     networks:
       - ecommerce-network
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
 
 networks:
   ecommerce-network:
@@ -40,3 +51,4 @@ networks:
 
 volumes:
   postgres_data:
+    driver: local
