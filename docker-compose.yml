@@ -27,13 +27,11 @@ services:
       dockerfile: Dockerfile
     container_name: ecommerce-app
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/ecomdb
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: Pass123
-      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
-      SPRING_JPA_HIBERNATE_DDL_AUTO: update
-      SPRING_JPA_SHOW_SQL: false
-      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ecomdb
+      DB_USERNAME: postgres
+      DB_PASSWORD: Pass123
     ports:
       - "8080:8080"
     depends_on:
@@ -42,8 +40,6 @@ services:
     networks:
       - ecommerce-network
     restart: unless-stopped
-    stdin_open: true
-    tty: true
 
 networks:
   ecommerce-network:
